@@ -927,14 +927,14 @@ void calibrate_print_surface(float z_offset) {
   bed_level[0][5] = bed_level[1][5] + (bed_level[0][4] - bed_level[1][4]);
   bed_level[6][5] = bed_level[5][5] + (bed_level[6][4] - bed_level[5][4]);
 
-  bed_level[1][0] = bed_level[2][0] + (bed_level[1][2] - bed_level[2][2]);
+  bed_level[1][0] = bed_level[2][0] + (bed_level[1][1] - bed_level[2][1]);
   bed_level[1][6] = bed_level[2][6] + (bed_level[1][5] - bed_level[2][5]);
-  bed_level[0][0] = bed_level[1][0] + (bed_level[0][2] - bed_level[1][2]);
+  bed_level[0][0] = bed_level[1][0] + (bed_level[0][1] - bed_level[1][1]);
   bed_level[0][6] = bed_level[1][6] + (bed_level[0][5] - bed_level[1][5]);
 
   bed_level[5][0] = bed_level[4][0] + (bed_level[5][1] - bed_level[4][1]);
   bed_level[5][6] = bed_level[4][6] + (bed_level[5][5] - bed_level[4][5]);
-  bed_level[6][0] = bed_level[5][0] + (bed_level[4][1] - bed_level[5][1]);
+  bed_level[6][0] = bed_level[5][0] + (bed_level[6][1] - bed_level[5][1]);
   bed_level[6][6] = bed_level[5][6] + (bed_level[6][5] - bed_level[5][5]);
   // Print calibration results for manual frame adjustment.
   SERIAL_PROTOCOLPGM("after fix calibration");
