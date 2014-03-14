@@ -891,17 +891,52 @@ float z_probe() {
   return mm;
 }
 
+#define MAX_BED_LEVEL_DIFF	0.4
+
 void calibrate_print_surface(float z_offset) {
   for (int y = 3; y >= -3; y--) {
     int dir = y % 2 ? -1 : 1;
+
+    int first_x = 1;
+    float pre_value =0;
     for (int x = -3*dir; x != 4*dir; x += dir) {
+      SERIAL_PROTOCOLPGM("pre_value : ");
+      SERIAL_PROTOCOL_F(pre_value, 3);
+      SERIAL_ECHOLN("");
+
       if (x*x + y*y < 11) {
 	    destination[X_AXIS] = AUTOLEVEL_GRID * x - z_probe_offset[X_AXIS];
 	    destination[Y_AXIS] = AUTOLEVEL_GRID * y - z_probe_offset[Y_AXIS];
 	    bed_level[x+3][y+3] = z_probe() + z_offset;
+
+	    //average large difference bed level
+	    if(first_x){
+	    	first_x = 0;
+	    }
+	    else{
+	    	if(abs(pre_value-bed_level[x+3][y+3])>MAX_BED_LEVEL_DIFF){
+	    		SERIAL_PROTOCOLPGM("fix large difference bed level");
+	    		SERIAL_ECHOLN("");
+	    		SERIAL_PROTOCOL_F(bed_level[x+3][y+3], 3);
+	    		SERIAL_PROTOCOLPGM(" to ");
+
+	    		if(pre_value>bed_level[x+3][y+3]){
+	    			bed_level[x+3][y+3]= pre_value - MAX_BED_LEVEL_DIFF;
+	    		}
+	    		else{
+	    			bed_level[x+3][y+3]= pre_value+MAX_BED_LEVEL_DIFF;
+	    		}
+	    		SERIAL_PROTOCOL_F(bed_level[x+3][y+3], 3);
+	    		SERIAL_ECHOLN("");
+	    	}
+	    }
+
       } else {
-	    bed_level[x+3][y+3] = 0.0;
+    	  bed_level[x+3][y+3] = 0.0;
+    	  first_x = 1;
       }
+
+      pre_value = bed_level[x+3][y+3];
     }
     // For unprobed positions just copy nearest neighbor.
     /*if (abs(y) >= 3) {
@@ -936,6 +971,7 @@ void calibrate_print_surface(float z_offset) {
   bed_level[5][6] = bed_level[4][6] + (bed_level[5][5] - bed_level[4][5]);
   bed_level[6][0] = bed_level[5][0] + (bed_level[6][1] - bed_level[5][1]);
   bed_level[6][6] = bed_level[5][6] + (bed_level[6][5] - bed_level[5][5]);
+
   // Print calibration results for manual frame adjustment.
   SERIAL_PROTOCOLPGM("after fix calibration");
   SERIAL_ECHOLN("");
