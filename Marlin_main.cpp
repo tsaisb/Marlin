@@ -983,6 +983,78 @@ void calibrate_print_surface(float z_offset) {
   }
 }
 
+void mean_calibrate_print_surface(float z_offset) {
+  for (int y = 3; y >= -3; y--) {
+    int dir = y % 2 ? -1 : 1;
+
+    for (int x = -3*dir; x != 4*dir; x += dir) {
+
+      if (x*x + y*y < 11) {
+	    destination[X_AXIS] = AUTOLEVEL_GRID * x - z_probe_offset[X_AXIS];
+	    destination[Y_AXIS] = AUTOLEVEL_GRID * y - z_probe_offset[Y_AXIS];
+	    bed_level[x+3][y+3] += z_probe() + z_offset;
+	    bed_level[x+3][y+3] /=2;
+      } else {
+        //bed_level[x+3][y+3] = 0.0;
+      }
+    }
+    // For unprobed positions just copy nearest neighbor.
+    /*if (abs(y) >= 3) {
+      bed_level[1][y+3] = bed_level[2][y+3];
+      bed_level[5][y+3] = bed_level[4][y+3];
+    }
+    if (abs(y) >=2) {
+      bed_level[0][y+3] = bed_level[1][y+3];
+      bed_level[6][y+3] = bed_level[5][y+3];
+    }*/
+
+    // Print calibration results for manual frame adjustment.
+    for (int x = -3; x <= 3; x++) {
+      SERIAL_PROTOCOL_F(bed_level[x+3][y+3], 3);
+      SERIAL_PROTOCOLPGM(" ");
+    }
+    SERIAL_ECHOLN("");
+  }
+
+  bed_level[0][1] += bed_level[1][1] + (bed_level[0][2] - bed_level[1][2]);
+  bed_level[0][1] /=2;
+  bed_level[6][1] += bed_level[5][1] + (bed_level[6][2] - bed_level[5][2]);
+  bed_level[6][1] /=2;
+
+  bed_level[0][5] += bed_level[1][5] + (bed_level[0][4] - bed_level[1][4]);
+  bed_level[0][5] /=2;
+  bed_level[6][5] += bed_level[5][5] + (bed_level[6][4] - bed_level[5][4]);
+  bed_level[6][5] /=2;
+
+  bed_level[1][0] += bed_level[2][0] + (bed_level[1][1] - bed_level[2][1]);
+  bed_level[1][0] /=2;
+  bed_level[1][6] += bed_level[2][6] + (bed_level[1][5] - bed_level[2][5]);
+  bed_level[1][6] /=2;
+  bed_level[0][0] += bed_level[1][0] + (bed_level[0][1] - bed_level[1][1]);
+  bed_level[0][0] /=2;
+  bed_level[0][6] += bed_level[1][6] + (bed_level[0][5] - bed_level[1][5]);
+  bed_level[0][6] /=2;
+
+  bed_level[5][0] += bed_level[4][0] + (bed_level[5][1] - bed_level[4][1]);
+  bed_level[5][0] /=2;
+  bed_level[5][6] += bed_level[4][6] + (bed_level[5][5] - bed_level[4][5]);
+  bed_level[5][6] /=2;
+  bed_level[6][0] += bed_level[5][0] + (bed_level[6][1] - bed_level[5][1]);
+  bed_level[6][0] /=2;
+  bed_level[6][6] += bed_level[5][6] + (bed_level[6][5] - bed_level[5][5]);
+  bed_level[6][6] /=2;
+  // Print calibration results for manual frame adjustment.
+  SERIAL_PROTOCOLPGM("after mean calibration");
+  SERIAL_ECHOLN("");
+  for(int y = 3; y >= -3; y--) {
+      for (int x = -3; x <= 3; x++) {
+        SERIAL_PROTOCOL_F(bed_level[x+3][y+3], 3);
+        SERIAL_PROTOCOLPGM(" ");
+      }
+      SERIAL_ECHOLN("");
+  }
+}
+
 void process_commands()
 {
   unsigned long codenum; //throw away variable
@@ -1221,6 +1293,21 @@ void process_commands()
       previous_millis_cmd = millis();
       endstops_hit_on_purpose();
       break;
+
+    case 30: // G30 mean bed level calibrate
+        saved_feedrate = feedrate*3.5;
+        saved_feedmultiply = feedmultiply;
+        feedmultiply = 100;
+        deploy_z_probe();
+        mean_calibrate_print_surface(z_probe_offset[Z_AXIS] + (code_seen(axis_codes[Z_AXIS]) ? code_value() : 0.0));
+        retract_z_probe();
+
+        feedrate = saved_feedrate;
+        feedmultiply = saved_feedmultiply;
+        previous_millis_cmd = millis();
+        endstops_hit_on_purpose();
+        break;
+
     case 90: // G90
       relative_mode = false;
       break;
