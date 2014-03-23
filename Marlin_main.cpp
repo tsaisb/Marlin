@@ -891,7 +891,7 @@ float z_probe() {
   return mm;
 }
 
-#define MAX_BED_LEVEL_DIFF	0.4
+#define MAX_BED_LEVEL_DIFF	1.5
 
 void calibrate_print_surface(float z_offset) {
   for (int y = 3; y >= -3; y--) {
@@ -932,8 +932,8 @@ void calibrate_print_surface(float z_offset) {
 	    }
 
       } else {
-    	  bed_level[x+3][y+3] = 0.0;
-    	  first_x = 1;
+	    bed_level[x+3][y+3] = 0.0;
+      first_x = 1;
       }
 
       pre_value = bed_level[x+3][y+3];
@@ -971,7 +971,6 @@ void calibrate_print_surface(float z_offset) {
   bed_level[5][6] = bed_level[4][6] + (bed_level[5][5] - bed_level[4][5]);
   bed_level[6][0] = bed_level[5][0] + (bed_level[6][1] - bed_level[5][1]);
   bed_level[6][6] = bed_level[5][6] + (bed_level[6][5] - bed_level[5][5]);
-
   // Print calibration results for manual frame adjustment.
   SERIAL_PROTOCOLPGM("after fix calibration");
   SERIAL_ECHOLN("");
@@ -1605,6 +1604,9 @@ void process_commands()
         else {
           fanSpeed=255;
         }
+        SERIAL_PROTOCOLPGM(" fanSpeed :");
+        SERIAL_PROTOCOL(fanSpeed);
+        SERIAL_PROTOCOLLN("");
         break;
       case 107: //M107 Fan Off
         fanSpeed = 0;
