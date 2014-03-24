@@ -948,14 +948,14 @@ void calibrate_print_surface(float z_offset) {
       pre_value = bed_level[x+3][y+3];
     }
     // For unprobed positions just copy nearest neighbor.
-    /*if (abs(y) >= 3) {
+    if (abs(y) >= 3) {
       bed_level[1][y+3] = bed_level[2][y+3];
       bed_level[5][y+3] = bed_level[4][y+3];
     }
     if (abs(y) >=2) {
       bed_level[0][y+3] = bed_level[1][y+3];
       bed_level[6][y+3] = bed_level[5][y+3];
-    }*/
+    }
 
     // Print calibration results for manual frame adjustment.
     for (int x = -3; x <= 3; x++) {
@@ -964,7 +964,7 @@ void calibrate_print_surface(float z_offset) {
     }
     SERIAL_ECHOLN("");
   }
-
+  /*
   bed_level[0][1] = bed_level[1][1] + (bed_level[0][2] - bed_level[1][2]);
   bed_level[6][1] = bed_level[5][1] + (bed_level[6][2] - bed_level[5][2]);
 
@@ -980,6 +980,7 @@ void calibrate_print_surface(float z_offset) {
   bed_level[5][6] = bed_level[4][6] + (bed_level[5][5] - bed_level[4][5]);
   bed_level[6][0] = bed_level[5][0] + (bed_level[6][1] - bed_level[5][1]);
   bed_level[6][6] = bed_level[5][6] + (bed_level[6][5] - bed_level[5][5]);
+  */
   // Print calibration results for manual frame adjustment.
   SERIAL_PROTOCOLPGM("after fix calibration");
   SERIAL_ECHOLN("");
@@ -1012,14 +1013,18 @@ void mean_calibrate_print_surface(float z_offset) {
       }
     }
     // For unprobed positions just copy nearest neighbor.
-    /*if (abs(y) >= 3) {
-      bed_level[1][y+3] = bed_level[2][y+3];
-      bed_level[5][y+3] = bed_level[4][y+3];
+    if (abs(y) >= 3) {
+      bed_level[1][y+3] += bed_level[2][y+3];
+      bed_level[5][y+3] += bed_level[4][y+3];
+      bed_level[1][y+3] /= 2;
+      bed_level[5][y+3] /= 2;
     }
     if (abs(y) >=2) {
-      bed_level[0][y+3] = bed_level[1][y+3];
-      bed_level[6][y+3] = bed_level[5][y+3];
-    }*/
+      bed_level[0][y+3] += bed_level[1][y+3];
+      bed_level[6][y+3] += bed_level[5][y+3];
+      bed_level[0][y+3] /= 2;
+      bed_level[6][y+3] /= 2;
+    }
 
     // Print calibration results for manual frame adjustment.
     for (int x = -3; x <= 3; x++) {
@@ -1028,7 +1033,7 @@ void mean_calibrate_print_surface(float z_offset) {
     }
     SERIAL_ECHOLN("");
   }
-
+  /*
   bed_level[0][1] += bed_level[1][1] + (bed_level[0][2] - bed_level[1][2]);
   bed_level[0][1] /=2;
   bed_level[6][1] += bed_level[5][1] + (bed_level[6][2] - bed_level[5][2]);
@@ -1056,6 +1061,7 @@ void mean_calibrate_print_surface(float z_offset) {
   bed_level[6][0] /=2;
   bed_level[6][6] += bed_level[5][6] + (bed_level[6][5] - bed_level[5][5]);
   bed_level[6][6] /=2;
+  */
   // Print calibration results for manual frame adjustment.
   SERIAL_PROTOCOLPGM("after mean calibration");
   SERIAL_ECHOLN("");
