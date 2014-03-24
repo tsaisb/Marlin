@@ -246,14 +246,15 @@ static char *strchr_pointer; // just a pointer to find chars in the cmd string l
 const int sensitive_pins[] = SENSITIVE_PINS; // Sensitive pin list for M42
 
 const float default_bed_level[7][7] = {
-  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
-  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
-  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
-  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
-  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
-  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
-  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+  {1.125, 0.688, 1.300, 0.975, 1.300, 1.150, 1.675},
+  {1.125, 0.588, 1.113, 0.588, 1.225, 1.150, 1.675},
+  {1.125, 0.625, 1.050, 0.637, 1.138, 1.037, 1.675},
+  {1.088, 1.038, 0.963, 1.050, 1.088, 1.350, 1.725},
+  {1.338, 1.413, 0.825, 1.388, 1.013, 1.600, 2.162},
+  {1.338, 1.900, 0.638, 1.700, 0.900, 1.788, 2.162},
+  {1.338, 1.900, 1.850, 2.000, 1.838, 1.788, 2.162},
 };
+
 //static float tt = 0;
 //static float bt = 0;
 
@@ -984,11 +985,13 @@ void calibrate_print_surface(float z_offset) {
   // Print calibration results for manual frame adjustment.
   SERIAL_PROTOCOLPGM("after fix calibration");
   SERIAL_ECHOLN("");
-  for(int y = 3; y >= -3; y--) {
-      for (int x = -3; x <= 3; x++) {
-        SERIAL_PROTOCOL_F(bed_level[x+3][y+3], 3);
-        SERIAL_PROTOCOLPGM(" ");
+  for(int x = 0; x < 7; x++) {
+      SERIAL_PROTOCOLPGM("{ ");
+      for (int y = 0; y < 7; y++) {
+        SERIAL_PROTOCOL_F(bed_level[x][y], 3);
+        SERIAL_PROTOCOLPGM(", ");
       }
+      SERIAL_PROTOCOLPGM(" },");
       SERIAL_ECHOLN("");
   }
 }
@@ -1004,10 +1007,12 @@ void mean_calibrate_print_surface(float z_offset) {
     for (int x = -3*dir; x != 4*dir; x += dir) {
 
       if (x*x + y*y < 11) {
-	    destination[X_AXIS] = AUTOLEVEL_GRID * x - z_probe_offset[X_AXIS];
-	    destination[Y_AXIS] = AUTOLEVEL_GRID * y - z_probe_offset[Y_AXIS];
-	    bed_level[x+3][y+3] += z_probe() + z_offset;
-	    bed_level[x+3][y+3] /=2;
+	        destination[X_AXIS] = AUTOLEVEL_GRID * x - z_probe_offset[X_AXIS];
+          destination[Y_AXIS] = AUTOLEVEL_GRID * y - z_probe_offset[Y_AXIS];
+	        bed_level[x+3][y+3] += z_probe() + z_offset;
+	        bed_level[x+3][y+3] /=2;
+          SERIAL_PROTOCOL_F(bed_level[x+3][y+3], 3);
+          SERIAL_PROTOCOLPGM(" ");
       } else {
         //bed_level[x+3][y+3] = 0.0;
       }
@@ -1332,9 +1337,9 @@ void process_commands()
     			bed_level[x][y]=default_bed_level[x][y];
     		}
     	}
-    	for(int y = 3; y >= -3; y--) {
-    	    for (int x = -3; x <= 3; x++) {
-    	        SERIAL_PROTOCOL_F(bed_level[x+3][y+3], 3);
+    	for(int x=0;x<7;x++){
+        for(int y=0;y<7;y++){
+    	        SERIAL_PROTOCOL_F(bed_level[x][y], 3);
     	        SERIAL_PROTOCOLPGM(" ");
     	    }
     	    SERIAL_ECHOLN("");
