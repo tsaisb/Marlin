@@ -245,6 +245,15 @@ static char *strchr_pointer; // just a pointer to find chars in the cmd string l
 
 const int sensitive_pins[] = SENSITIVE_PINS; // Sensitive pin list for M42
 
+const float default_bed_level[7][7] = {
+  {0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0},
+};
 //static float tt = 0;
 //static float bt = 0;
 
@@ -984,6 +993,10 @@ void calibrate_print_surface(float z_offset) {
 }
 
 void mean_calibrate_print_surface(float z_offset) {
+
+  SERIAL_PROTOCOLPGM("start mean calibration");
+  SERIAL_ECHOLN("");
+
   for (int y = 3; y >= -3; y--) {
     int dir = y % 2 ? -1 : 1;
 
