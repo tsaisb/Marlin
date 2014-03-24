@@ -246,13 +246,13 @@ static char *strchr_pointer; // just a pointer to find chars in the cmd string l
 const int sensitive_pins[] = SENSITIVE_PINS; // Sensitive pin list for M42
 
 const float default_bed_level[7][7] = {
-  {0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0},
+  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+  {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
 };
 //static float tt = 0;
 //static float bt = 0;
@@ -1320,6 +1320,20 @@ void process_commands()
         previous_millis_cmd = millis();
         endstops_hit_on_purpose();
         break;
+    case 31:// G31 set default bed level
+    	for(int x=0;x<7;x++){
+    		for(int y=0;y<7;y++){
+    			bed_level[x][y]=default_bed_level[x][y];
+    		}
+    	}
+    	for(int y = 3; y >= -3; y--) {
+    	    for (int x = -3; x <= 3; x++) {
+    	        SERIAL_PROTOCOL_F(bed_level[x+3][y+3], 3);
+    	        SERIAL_PROTOCOLPGM(" ");
+    	    }
+    	    SERIAL_ECHOLN("");
+    	}
+    	break;
 
     case 90: // G90
       relative_mode = false;
